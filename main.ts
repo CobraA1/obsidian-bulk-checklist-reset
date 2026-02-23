@@ -1,9 +1,11 @@
 import {
   App,
+  Notice,
   MarkdownView,
   Plugin,
   PluginSettingTab,
   Setting,
+  TAbstractFile,
   TextFileView,
 } from "obsidian";
 
@@ -12,6 +14,11 @@ import { ChecklistResetSettings } from "src/types";
 import { handleCanvasAction } from "src/handleCanvasAction";
 import { handleBulkMarkdownAction } from "src/handleBulkMarkdownAction";
 import { handleMarkdownAction } from "src/handleMarkdownAction";
+import {
+  addPathRule,
+  hasPathRule,
+  removePathRule,
+} from "./src/pathListSettings";
 
 const DEFAULT_SETTINGS: ChecklistResetSettings = {
   deleteTextOnReset: "",
@@ -130,6 +137,69 @@ export default class ChecklistReset extends Plugin {
       callback: async () => {
         await handleBulkMarkdownAction(this.app, this.settings);
       },
+    });
+
+    this.registerEvent(
+      this.app.workspace.on("file-menu", (menu, file) => {
+        this.addBulkPathMenuItems(menu, file);
+      })
+    );
+  }
+
+  private async updateBulkRuleForPath(
+    filePath: string,
+    listType: "include" | "exclude",
+    action: "add" | "remove"
+  ): Promise<void> {
+    const settingKey =
+      listType === "include" ? "bulkIncludePaths" : "bulkExcludePaths";
+    const currentValue = this.settings[settingKey];
+    const updatedValue =
+      action === "add"
+        ? addPathRule(currentValue, filePath)
+        : removePathRule(currentValue, filePath);
+
+    if (updatedValue === currentValue) {
+      return;
+    }
+
+    this.settings[settingKey] = updatedValue;
+    await this.saveSettings();
+
+    const target = listType === "include" ? "include" : "exclude";
+    const verb = action === "add" ? "Added" : "Removed";
+    new Notice(`${verb} "${filePath}" ${action === "add" ? "to" : "from"} bulk ${target} paths.`);
+  }
+
+  private addBulkPathMenuItems(menu: any, file: TAbstractFile): void {
+    const filePath = file.path;
+    const inInclude = hasPathRule(this.settings.bulkIncludePaths, filePath);
+    const inExclude = hasPathRule(this.settings.bulkExcludePaths, filePath);
+
+    menu.addSeparator();
+
+    menu.addItem((item: any) => {
+      item
+        .setTitle(inInclude ? "Remove from bulk include" : "Add to bulk include")
+        .onClick(async () => {
+          await this.updateBulkRuleForPath(
+            filePath,
+            "include",
+            inInclude ? "remove" : "add"
+          );
+        });
+    });
+
+    menu.addItem((item: any) => {
+      item
+        .setTitle(inExclude ? "Remove from bulk exclude" : "Add to bulk exclude")
+        .onClick(async () => {
+          await this.updateBulkRuleForPath(
+            filePath,
+            "exclude",
+            inExclude ? "remove" : "add"
+          );
+        });
     });
   }
 }

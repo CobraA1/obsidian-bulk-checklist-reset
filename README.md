@@ -43,3 +43,10 @@ Projects/Work/Archive
 ```
 
 Bulk reset v1 only processes Markdown files.
+
+### File explorer shortcuts
+
+In the file tree, right-click any file or folder to add or remove it from bulk include/exclude paths:
+
+- Add to bulk include / Remove from bulk include
+- Add to bulk exclude / Remove from bulk exclude
