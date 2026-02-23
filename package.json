@@ -6,6 +6,8 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"sync:vault": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-to-vault.ps1",
+		"build:vault": "npm run build && npm run sync:vault",
 		"test": "vitest",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
