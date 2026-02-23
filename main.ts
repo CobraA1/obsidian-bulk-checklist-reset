@@ -32,6 +32,7 @@ function configureBulkPathTextArea(textAreaEl: HTMLTextAreaElement): void {
   textAreaEl.style.maxWidth = "500px";
   textAreaEl.style.overflowX = "auto";
   textAreaEl.wrap = "off";
+  textAreaEl.addClass("checklist-reset-bulk-paths");
 }
 
 function handleAction(
@@ -188,7 +189,11 @@ export default class ChecklistReset extends Plugin {
 
     menu.addItem((item: any) => {
       item
-        .setTitle(inInclude ? "Remove from bulk include" : "Add to bulk include")
+        .setTitle(
+          inInclude
+            ? "Checklist Reset: Remove from Bulk Include"
+            : "Checklist Reset: Add to Bulk Include"
+        )
         .onClick(async () => {
           await this.updateBulkRuleForPath(
             filePath,
@@ -200,7 +205,11 @@ export default class ChecklistReset extends Plugin {
 
     menu.addItem((item: any) => {
       item
-        .setTitle(inExclude ? "Remove from bulk exclude" : "Add to bulk exclude")
+        .setTitle(
+          inExclude
+            ? "Checklist Reset: Remove from Bulk Exclude"
+            : "Checklist Reset: Add to Bulk Exclude"
+        )
         .onClick(async () => {
           await this.updateBulkRuleForPath(
             filePath,

@@ -1,0 +1,4 @@
+.checklist-reset-bulk-paths::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
