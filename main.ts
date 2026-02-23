@@ -26,6 +26,14 @@ const DEFAULT_SETTINGS: ChecklistResetSettings = {
   bulkExcludePaths: "",
 };
 
+function configureBulkPathTextArea(textAreaEl: HTMLTextAreaElement): void {
+  textAreaEl.style.width = "500px";
+  textAreaEl.style.minWidth = "500px";
+  textAreaEl.style.maxWidth = "500px";
+  textAreaEl.style.overflowX = "auto";
+  textAreaEl.wrap = "off";
+}
+
 function handleAction(
   app: App,
   view: TextFileView,
@@ -238,13 +246,16 @@ export class ChecklistResetSettingTab extends PluginSettingTab {
         "One vault-relative file or folder path per line. Bulk reset only runs when at least one include path is set."
       )
       .addTextArea((text) =>
-        text
-          .setPlaceholder("Projects/Work\nDaily/2026-02-23.md")
-          .setValue(this.plugin.settings.bulkIncludePaths)
-          .onChange(async (value) => {
-            this.plugin.settings.bulkIncludePaths = value;
-            await this.plugin.saveSettings();
-          })
+        {
+          configureBulkPathTextArea(text.inputEl);
+          return text
+            .setPlaceholder("Projects/Work\nDaily/2026-02-23.md")
+            .setValue(this.plugin.settings.bulkIncludePaths)
+            .onChange(async (value) => {
+              this.plugin.settings.bulkIncludePaths = value;
+              await this.plugin.saveSettings();
+            });
+        }
       );
 
     new Setting(containerEl)
@@ -253,13 +264,16 @@ export class ChecklistResetSettingTab extends PluginSettingTab {
         "One vault-relative file or folder path per line. Exclusions override included paths."
       )
       .addTextArea((text) =>
-        text
-          .setPlaceholder("Projects/Work/Archive")
-          .setValue(this.plugin.settings.bulkExcludePaths)
-          .onChange(async (value) => {
-            this.plugin.settings.bulkExcludePaths = value;
-            await this.plugin.saveSettings();
-          })
+        {
+          configureBulkPathTextArea(text.inputEl);
+          return text
+            .setPlaceholder("Projects/Work/Archive")
+            .setValue(this.plugin.settings.bulkExcludePaths)
+            .onChange(async (value) => {
+              this.plugin.settings.bulkExcludePaths = value;
+              await this.plugin.saveSettings();
+            });
+        }
       );
   }
 }
