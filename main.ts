@@ -10,9 +10,14 @@ import {
 import { SetAction } from "./src/setChecklistItems";
 import { ChecklistResetSettings } from "src/types";
 import { handleCanvasAction } from "src/handleCanvasAction";
+import { handleBulkMarkdownAction } from "src/handleBulkMarkdownAction";
 import { handleMarkdownAction } from "src/handleMarkdownAction";
 
-const DEFAULT_SETTINGS: ChecklistResetSettings = { deleteTextOnReset: "" };
+const DEFAULT_SETTINGS: ChecklistResetSettings = {
+  deleteTextOnReset: "",
+  bulkIncludePaths: "",
+  bulkExcludePaths: "",
+};
 
 function handleAction(
   app: App,
@@ -118,6 +123,14 @@ export default class ChecklistReset extends Plugin {
         }
       },
     });
+
+    this.addCommand({
+      id: "checklist-reset-bulk",
+      name: "Reset checklists (bulk)",
+      callback: async () => {
+        await handleBulkMarkdownAction(this.app, this.settings);
+      },
+    });
   }
 }
 
@@ -145,6 +158,36 @@ export class ChecklistResetSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.deleteTextOnReset)
           .onChange(async (value) => {
             this.plugin.settings.deleteTextOnReset = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Bulk include paths")
+      .setDesc(
+        "One vault-relative file or folder path per line. Bulk reset only runs when at least one include path is set."
+      )
+      .addTextArea((text) =>
+        text
+          .setPlaceholder("Projects/Work\nDaily/2026-02-23.md")
+          .setValue(this.plugin.settings.bulkIncludePaths)
+          .onChange(async (value) => {
+            this.plugin.settings.bulkIncludePaths = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Bulk exclude paths")
+      .setDesc(
+        "One vault-relative file or folder path per line. Exclusions override included paths."
+      )
+      .addTextArea((text) =>
+        text
+          .setPlaceholder("Projects/Work/Archive")
+          .setValue(this.plugin.settings.bulkExcludePaths)
+          .onChange(async (value) => {
+            this.plugin.settings.bulkExcludePaths = value;
             await this.plugin.saveSettings();
           })
       );
